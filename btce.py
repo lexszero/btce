@@ -9,9 +9,14 @@ import hmac
 import config
 
 def nonce_generator():
-	fd = open("nonce_state", "r")
-	nonce = int(fd.read())
-	fd.close()
+	try:
+		fd = open("nonce_state", "r")
+		nonce = int(fd.read())
+		fd.close()
+	except IOError:
+		nonce = 1
+		pass
+		
 	while (True):
 		nonce = nonce+1
 		fd = open("nonce_state", "w")
@@ -80,10 +85,10 @@ def ticker(pair):
 	return pubapi_request(pair, "ticker")['ticker']
 
 def trades(pair):
-	return pubapi_request(pair, "ticker")['ticker']
+	return pubapi_request(pair, "trades")
 
 def depth(pair):
-	return pubapi_request(pair, "ticker")['ticker']
+	return pubapi_request(pair, "depth")
 
 def getinfo():
 	return api_request('getInfo')
@@ -97,7 +102,7 @@ def trans_history(filter = {}):
 def trade_history(filter = {}):
 	return api_request('TradeHistory', filter)
 
-def prepare_trade(from_currency, to_currency, rate, amount):
+def prepare_deal(from_currency, to_currency, rate, amount):
 	pair = [from_currency, to_currency]
 	for p in correct_pairs:
 		if pair == p:
@@ -109,11 +114,14 @@ def prepare_trade(from_currency, to_currency, rate, amount):
 	pair = '_'.join(pair)
 	if not type:
 		raise BTCEError("Unsupported currency pair: " + pair[0] + "_" + pair[1])
-	return pair, type, rate, amount
+	return {'pair': pair, 'type':type, 'rate': rate, 'amount': amount}
 
-def trade(pair, type, rate, amount):
+def trade(deal):
 #	print pair, type, amount, rate
-	return api_request('Trade', { 'pair': pair, 'type': type, 'rate': rate, 'amount': amount })
+	if deal.has_key('pair') and deal.has_key('type') and deal.has_key('rate') and deal.has_key('amount'):
+		return api_request('Trade', deal)
+	else:
+		raise BTCEError("Wrong deal specified: ", str(deal))
 
 def cancel_order(id):
 	return api_request('CancelOrder', {'order_id': id})
