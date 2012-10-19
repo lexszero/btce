@@ -1,0 +1,15 @@
+Python API and tools for btc-e.com Bitcoin exchange
+==========
+
+Author: Alex Ignatov aka LexsZero <lexszero@gmail.com>
+
+Licensed under WTFPL
+
+Before usage, put your API key and secret to config.py 
+
+For documentation, read the source :)
+
+Tools:
+
+* show_info.py - shows your funds and open orders
+* TODO: moar awesome tools
